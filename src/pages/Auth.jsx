@@ -1,18 +1,37 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from "react-router-dom";
 
 
 export default function Auth() {
     const [mode, setMode] = useState('login');
+    const [error, setError] = useState(null);
+    const { signUp, login } = useAuth();
+
+    const navigate = useNavigate();
+
     const { register, handleSubmit, formState: { errors } } = useForm();
     function onSubmit(data) {
-        console.log(data);
+        let result;
+        if (mode === 'signup') {
+            result = signUp(data.email, data.password);
+        } else {
+            result = login(data.email, data.password);
+        }
+
+        if (result.success) {
+            navigate("/");
+        } else {
+            setError(result.message);
+        }
     }
     return (
         <div className="page">
             <div className="container">
                 <div className="auth-container">
                     <h1 className="page-title">{mode === 'signup' ? 'Sign Up' : 'Login'}</h1>
+                    {error && <span className="form-error" role="alert">{error}</span>}
                     <form action="" className="auth-form" onSubmit={handleSubmit(onSubmit)}>
                         <div className="form-group">
                             <label htmlFor="email" className="form-label">Email</label>
